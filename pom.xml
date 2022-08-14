@@ -8,6 +8,33 @@
     <artifactId>learnOpenGl</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+
+    <profiles>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>Windows</family>
+                </os>
+            </activation>
+            <properties>
+                <lwjgl.natives>natives-windows</lwjgl.natives>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux</id>
+            <activation>
+                <os>
+                    <name>unix</name>
+                    <family>Linux</family>
+                </os>
+            </activation>
+            <properties>
+                <lwjgl.natives>natives-linux</lwjgl.natives>
+            </properties>
+        </profile>
+    </profiles>
+
     <modules>
         <module>GettingStarted</module>
     </modules>
@@ -19,7 +46,6 @@
         <!-- lwjgl variables -->
         <lwjgl.version>3.3.1</lwjgl.version>
         <joml.version>1.10.4</joml.version>
-        <lwjgl.natives>natives-windows</lwjgl.natives>
     </properties>
 
     <dependencyManagement>
