@@ -16,6 +16,7 @@
         <module>HelloTriangle</module>
         <module>Shaders</module>
         <module>Textures</module>
+        <module>Transformations</module>
     </modules>
 
     <properties>

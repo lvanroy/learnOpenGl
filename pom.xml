@@ -25,8 +25,8 @@
             <id>linux</id>
             <activation>
                 <os>
-                    <name>unix</name>
-                    <family>Linux</family>
+                    <family>unix</family>
+                    <name>Linux</name>
                 </os>
             </activation>
             <properties>
@@ -328,11 +328,6 @@
         <dependency>
             <groupId>org.lwjgl</groupId>
             <artifactId>lwjgl-opus</artifactId>
-            <classifier>${lwjgl.natives}</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.lwjgl</groupId>
-            <artifactId>lwjgl-ovr</artifactId>
             <classifier>${lwjgl.natives}</classifier>
         </dependency>
         <dependency>
