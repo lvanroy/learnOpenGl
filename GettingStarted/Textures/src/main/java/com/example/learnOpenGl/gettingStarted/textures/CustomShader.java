@@ -45,6 +45,10 @@ public class CustomShader {
         glUniform1f(glGetUniformLocation(program, name), value);
     }
 
+    public void delete() {
+        glDeleteProgram(program);
+    }
+
     private String readFile(URL path) {
         StringBuilder builder = new StringBuilder();
 

@@ -12,32 +12,16 @@ import java.nio.IntBuffer;
 import java.util.logging.Logger;
 
 import static java.lang.System.exit;
-import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
-import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
-import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
-import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
-import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
-import static org.lwjgl.glfw.GLFW.glfwGetKey;
-import static org.lwjgl.glfw.GLFW.glfwInit;
-import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
-import static org.lwjgl.glfw.GLFW.glfwPollEvents;
-import static org.lwjgl.glfw.GLFW.glfwSetFramebufferSizeCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
-import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
-import static org.lwjgl.glfw.GLFW.glfwTerminate;
-import static org.lwjgl.glfw.GLFW.glfwWindowHint;
-import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
+import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.stb.STBImage.stbi_image_free;
-import static org.lwjgl.stb.STBImage.stbi_load;
+import static org.lwjgl.stb.STBImage.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
-public class TextureClass {
+
+public class Exercise2 {
 
     private static final Logger logger = Logger.getAnonymousLogger();
 
@@ -51,14 +35,15 @@ public class TextureClass {
 
     // Texture
     private static final String CONTAINER_TEXTURE_PATH = new File(TextureClass.class.getClassLoader().getResource("container.jpg").getFile()).getPath();
+    private static final String AWESOMEFACE_TEXTURE_PATH = new File(TextureClass.class.getClassLoader().getResource("awesomeface.png").getFile()).getPath();
 
     // Define vertex input data
     private static final float[] VERTICES = {
-            // positions        // colors         // texture coords
-             0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-             0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+            // positions        // colors        // texture coords
+             0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f, 2.0f, // top right
+             0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f, // bottom right
             -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-            -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f // top left
+            -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 2.0f // top left
     };
 
     private static final int[] INDICES = {
@@ -105,15 +90,20 @@ public class TextureClass {
 //        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
-    private static int loadTexture(String path) throws URISyntaxException {
+    private static int loadTexture(String path, boolean containsAlpha, boolean repeat) throws URISyntaxException {
         int texture = glGenTextures();
 
         // Bind the texture to the current context so that all subsequent operations affect THIS instance
         glBindTexture(GL_TEXTURE_2D, texture);
 
         // Set the texture wrapping parameters (these are defaults)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        if (repeat) {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        } else {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        }
 
         // Set the texture filtering parameters (GL_NEAREST is default)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -124,10 +114,15 @@ public class TextureClass {
             IntBuffer height = stack.ints(0);
             IntBuffer nrChannels = stack.ints(0);
 
+            stbi_set_flip_vertically_on_load(true);
             ByteBuffer data = stbi_load(path, width, height, nrChannels, 0);
 
             if (data != null) {
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width.get(0), height.get(0), 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+                if (containsAlpha) {
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width.get(0), height.get(0), 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+                } else {
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width.get(0), height.get(0), 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+                }
                 glGenerateMipmap(GL_TEXTURE_2D);
                 stbi_image_free(data);
             } else {
@@ -183,7 +178,11 @@ public class TextureClass {
         setUpVertexData(vao, vbo, ebo);
 
         // Initialize the texture
-        final int texture = loadTexture(CONTAINER_TEXTURE_PATH);
+        final int texture1 = loadTexture(CONTAINER_TEXTURE_PATH, false, false);
+        final int texture2 = loadTexture(AWESOMEFACE_TEXTURE_PATH, true, true);
+
+        shader.setInt("texture1", 0);
+        shader.setInt("texture2", 1);
 
         // Render loop
         while(!glfwWindowShouldClose(window)) {
@@ -194,7 +193,10 @@ public class TextureClass {
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
-            glBindTexture(GL_TEXTURE_2D, texture);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, texture1);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, texture2);
 
             // Use the shader program
             shader.use();
@@ -213,7 +215,8 @@ public class TextureClass {
         glDeleteVertexArrays(vao);
         glDeleteBuffers(vbo);
         glDeleteBuffers(ebo);
-        glDeleteTextures(texture);
+        glDeleteTextures(texture1);
+        glDeleteTextures(texture2);
         shader.delete();
 
         glfwTerminate();
