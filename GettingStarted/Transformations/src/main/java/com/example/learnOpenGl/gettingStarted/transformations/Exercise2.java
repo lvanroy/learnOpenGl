@@ -23,7 +23,7 @@ import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.stb.STBImage.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public class Transformations {
+public class Exercise2 {
 
     private static final Logger logger = Logger.getAnonymousLogger();
 
@@ -32,12 +32,12 @@ public class Transformations {
     final static int height = 600;
 
     // Vertex and fragment shader
-    private static final URL VERTEX_SHADER_PATH = Transformations.class.getClassLoader().getResource("shader.vs");
-    private static final URL FRAGMENT_SHADER_PATH = Transformations.class.getClassLoader().getResource("shader.fs");
+    private static final URL VERTEX_SHADER_PATH = Exercise2.class.getClassLoader().getResource("shader.vs");
+    private static final URL FRAGMENT_SHADER_PATH = Exercise2.class.getClassLoader().getResource("shader.fs");
 
     // Texture
-    private static final String CONTAINER_TEXTURE_PATH = new File(Transformations.class.getClassLoader().getResource("container.jpg").getFile()).getPath();
-    private static final String AWESOMEFACE_TEXTURE_PATH = new File(Transformations.class.getClassLoader().getResource("awesomeface.png").getFile()).getPath();
+    private static final String CONTAINER_TEXTURE_PATH = new File(Exercise2.class.getClassLoader().getResource("container.jpg").getFile()).getPath();
+    private static final String AWESOMEFACE_TEXTURE_PATH = new File(Exercise2.class.getClassLoader().getResource("awesomeface.png").getFile()).getPath();
 
     // Define vertex input data
     private static final float[] VERTICES = {
@@ -181,13 +181,6 @@ public class Transformations {
         shader.setInt("texture1", 0);
         shader.setInt("texture2", 1);
 
-        // Generate the transformation matrix
-        Matrix4f trans = new Matrix4f();
-        trans = trans.rotate(90.0f * (float) (Math.PI / 180), new Vector3f(0.0f, 0.0f, 1.0f).normalize());
-        trans = trans.scale(new Vector3f(0.5f, 0.5f, 0.5f));
-
-        shader.setFloatMatrix4f("transform", trans);
-
         // Render loop
         while(!glfwWindowShouldClose(window)) {
             // Input
@@ -207,6 +200,24 @@ public class Transformations {
 
             // Tech not needed as there is only one VBOe but that is not a realistic use case
             glBindVertexArray(vao);
+
+            // Generate the transformation matrix
+            Matrix4f trans = new Matrix4f();
+            trans
+                    .translate(0.5f, -0.5f, 0.0f)
+                    .rotate((float) glfwGetTime(), new Vector3f(0.0f, 0.0f, 1.0f).normalize());
+
+            shader.setFloatMatrix4f("transform", trans);
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            // Generate the transformation matrix for the second container
+            trans
+                    .translation(-0.5f, 0.5f, 0.0f)
+                    .scale((float) Math.sin(glfwGetTime()));
+
+            shader.setFloatMatrix4f("transform", trans);
+
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
             // Check and call events

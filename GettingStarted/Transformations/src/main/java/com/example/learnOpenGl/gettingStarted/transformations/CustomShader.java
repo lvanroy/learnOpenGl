@@ -55,6 +55,10 @@ public class CustomShader {
         }
     }
 
+    public void delete() {
+        glDeleteProgram(program);
+    }
+
     private String readFile(URL path) {
         StringBuilder builder = new StringBuilder();
 
